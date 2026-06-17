@@ -1,0 +1,94 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+.pnp
+.pnp.js
+.npm/
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Build Outputs
+# =========================
+build/
+dist/
+coverage/
+.cache/
+.turbo/
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+server.log
+
+# =========================
+# Docker
+# =========================
+*.tar
+
+# =========================
+# IDE & Editor Files
+# =========================
+.vscode/
+.idea/
+.kiro/
+*.swp
+*.swo
+*~
+
+# =========================
+# Operating System Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Vercel
+# =========================
+.vercel/
+
+# =========================
+# TypeScript
+# =========================
+*.tsbuildinfo
+
+# =========================
+# Yarn
+# =========================
+.yarn-integrity
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# =========================
+# Security Files
+# =========================
+*.pem
+*.key
+*.crt
+
+# =========================
+# Temporary Files
+# =========================
+*.tmp
+*.temp
+
+# =========================
+# Misc
+# =========================
+docker-compose.override.yml
