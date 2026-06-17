@@ -92,3 +92,13 @@ Thumbs.db
 # Misc
 # =========================
 docker-compose.override.yml
+
+# Remove project specific docs
+FRESH_GIT_PUSH_GUIDE.md
+NETLIFY_DEPLOYMENT_GUIDE.md
+NETLIFY_QUICK_SETUP.md
+
+# Optional docs cleanup
+docs/CLEANUP_SUMMARY.md
+docs/PRODUCTION_DEPLOYMENT_GUIDE.md
+docs/SECURITY_AUDIT_REPORT.md
