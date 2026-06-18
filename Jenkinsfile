@@ -110,14 +110,23 @@ stage('Push Frontend Image') {
         }
     }
 
+    stage('Create Deploy Variables') {
+    steps {
+        writeFile(
+            file: 'deploy.env',
+            text: "IMAGE_TAG=${env.BUILD_NUMBER}"
+        )
+    }
+}
+
     stage('Deploy Application'){
         steps{
 
-            bat 'docker compose -f docker-compose.prod.yml down'
+            bat 'docker compose --env-file deploy.env -f docker-compose.prod.yml down'
 
-            bat 'docker compose -f docker-compose.prod.yml pull'
+            bat 'docker compose --env-file deploy.env -f docker-compose.prod.yml pull'
 
-            bat 'docker compose -f docker-compose.prod.yml up -d'
+            bat 'docker compose --env-file deploy.env -f docker-compose.prod.yml up -d'
 
         }
     }
