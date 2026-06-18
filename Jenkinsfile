@@ -1,7 +1,6 @@
 pipeline {
 agent any
 
-```
 environment {
     DOCKERHUB_USERNAME = "sudharsanprakalathanvm"
 }
@@ -91,9 +90,9 @@ stages {
     //     steps {
     //         bat 'docker --version'
     //     }
+    
     // }
 
 }
-```
 
 }
