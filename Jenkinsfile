@@ -30,6 +30,7 @@ pipeline {
             }
         }
 
+        // Stage 1 testing of Jenkins Workflow 
         // stage('Verify Git') {
         //     steps {
         //         bat 'git --version'
@@ -40,7 +41,8 @@ pipeline {
         //     steps {
         //         bat 'docker --version'
         //     }
-        }
+        // }
+
 
     }
 }
