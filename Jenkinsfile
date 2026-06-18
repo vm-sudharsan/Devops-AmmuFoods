@@ -31,28 +31,28 @@ stages {
         }
     }
 
-    stage('Build Metadata') {
+stage('Build Metadata') {
 
-        when {
-            expression {
-                params.DEPLOY_ACTION == 'DEPLOY'
-            }
-        }
-
-        steps {
-
-            script {
-                env.GIT_COMMIT_SHORT =
-                    bat(
-                        script: 'git rev-parse --short HEAD',
-                        returnStdout: true
-                    ).trim()
-            }
-
-            echo "Build Number : ${env.BUILD_NUMBER}"
-            echo "Git Commit   : ${env.GIT_COMMIT_SHORT}"
+    when {
+        expression {
+            params.DEPLOY_ACTION == 'DEPLOY'
         }
     }
+
+    steps {
+
+        script {
+
+            env.GIT_COMMIT_SHORT = powershell(
+                script: '(git rev-parse --short HEAD).Trim()',
+                returnStdout: true
+            ).trim()
+        }
+
+        echo "Build Number : ${env.BUILD_NUMBER}"
+        echo "Git Commit   : ${env.GIT_COMMIT_SHORT}"
+    }
+}
 
     stage('Build Backend Image') {
 
