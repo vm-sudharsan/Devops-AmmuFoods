@@ -38,10 +38,60 @@ pipeline {
         {
             steps{
                 
-                
+
                 bat 'docker tag ammu-backend:latest %DOCKERHUB_USERNAME%/ammufoods-backend:latest'
 
                 bat 'docker tag ammu-frontend:latest %DOCKERHUB_USERNAME%/ammufoods-frontend:latest'
+            }
+        }
+
+        stage('Push Backend Image')
+        {
+            steps{
+                withCredentials([
+                    usernamePassword(
+                        credentialsId:'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    
+                    bat 'echo %DOCKER_PASS | docker login -u %DOCKER_USER% --password-stdin'
+
+                    bat 'docker push %DOCKER_USER%/ammufoods-backend:latest'
+                }
+            }
+        }
+
+        stage('Push Frontend Image'){
+            steps{
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    
+                    bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
+
+                    bat 'docker push %DOCKER_USER%/ammufoods-backend:latest'
+                }
+            }
+        }
+
+        stage('Push Frontend Image'){
+            steps{
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    
+                    bat 'docker push %DOCKER_USER%/ammufoods-frontend:latest'
+                }
             }
         }
 
