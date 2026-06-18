@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    enviroinment{
+        DOCKERHUB_USERNAME = "sudharsanprakalathanvm"
+    }
+
     stages {
         stage('Verify Tools')
         {
@@ -15,7 +19,7 @@ pipeline {
             steps{
                 dir('backend')
                 {
-                    bat 'docker build -t ammu-backend:jenkins .'
+                    bat 'docker build -t ammu-backend:latest .'
                 }
             }
         }
@@ -25,8 +29,18 @@ pipeline {
             steps{
                 dir('frontend')
                 {
-                    bat 'docker build -t ammu-frontend:jenkins .'
+                    bat 'docker build -t ammu-frontend:latest .'
                 }
+            }
+        }
+
+        stage('Tag Images')
+        {
+            steps{
+                
+                bat 'docker tag ammu-backend:latest %DOCKERHUB_USERNAME%/ammufoods-backend:latest'
+
+                bat 'docker tag ammu-frontend:lates %DOCKERHUB_USERNAME%/ammufoods-frontend:latest'
             }
         }
 
