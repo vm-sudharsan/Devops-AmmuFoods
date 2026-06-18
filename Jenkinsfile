@@ -38,9 +38,10 @@ pipeline {
         {
             steps{
                 
+                
                 bat 'docker tag ammu-backend:latest %DOCKERHUB_USERNAME%/ammufoods-backend:latest'
 
-                bat 'docker tag ammu-frontend:lates %DOCKERHUB_USERNAME%/ammufoods-frontend:latest'
+                bat 'docker tag ammu-frontend:latest %DOCKERHUB_USERNAME%/ammufoods-frontend:latest'
             }
         }
 
