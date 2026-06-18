@@ -44,70 +44,63 @@ pipeline {
                 bat 'docker tag ammu-frontend:latest %DOCKERHUB_USERNAME%/ammufoods-frontend:latest'
             }
         }
+        
+    stage('Docker Hub Login') {
+        steps {
+            withCredentials([
+                usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )
+            ]) {
 
-        stage('Push Backend Image')
-        {
-            steps{
-                withCredentials([
-                    usernamePassword(
-                        credentialsId:'dockerhub-creds',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    
-                    bat 'echo %DOCKER_PASS | docker login -u %DOCKER_USER% --password-stdin'
-
-                    bat 'docker push %DOCKER_USER%/ammufoods-backend:latest'
-                }
+                bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
             }
         }
-
-        stage('Push Frontend Image'){
-            steps{
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'dockerhub-creds',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    
-                    bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
-
-                    bat 'docker push %DOCKER_USER%/ammufoods-backend:latest'
-                }
-            }
-        }
-
-        stage('Push Frontend Image'){
-            steps{
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'dockerhub-creds',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    
-                    bat 'docker push %DOCKER_USER%/ammufoods-frontend:latest'
-                }
-            }
-        }
-
-        // Stage 1 testing of Jenkins Workflow 
-        // stage('Verify Git') {
-        //     steps {
-        //         bat 'git --version'
-        //     }
-        // }
-
-        // stage('Verify Docker') {
-        //     steps {
-        //         bat 'docker --version'
-        //     }
-        // }
-
-
     }
+
+    stage('Push Backend Image') {
+        steps {
+            withCredentials([
+                usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )
+            ]) {
+
+                bat 'docker push %DOCKER_USER%/ammufoods-backend:latest'
+            }
+        }
+    }
+
+    stage('Push Frontend Image') {
+        steps {
+            withCredentials([
+                usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )
+            ]) {
+
+                bat 'docker push %DOCKER_USER%/ammufoods-frontend:latest'
+            }
+        }
+    }
+
+    // Stage 1 testing of Jenkins Workflow
+    // stage('Verify Git') {
+    //     steps {
+    //         bat 'git --version'
+    //     }
+    // }
+
+    // stage('Verify Docker') {
+    //     steps {
+    //         bat 'docker --version'
+    //     }
+    // }
+
 }
