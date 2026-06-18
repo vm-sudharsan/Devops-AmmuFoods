@@ -103,7 +103,7 @@ stages {
 
             bat 'docker compose -f docker-compose.prod.yml pull'
 
-            bat 'docker commpose -f docker-compose.prod.yml up -d'
+            bat 'docker compose -f docker-compose.prod.yml up -d'
 
         }
     }
