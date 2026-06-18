@@ -7,6 +7,21 @@ environment {
     FRONTEND_IMAGE = "sudharsanprakalathanvm/ammufoods-frontend"
 }
 
+parameters {
+
+    choice(
+        name: 'DEPLOY_ACTION',
+        choices: ['DEPLOY', 'ROLLBACK'],
+        description: 'Deployment Action'
+    )
+
+    string(
+        name: 'ROLLBACK_VERSION',
+        defaultValue: '',
+        description: 'Version to rollback'
+    )
+}
+
 stages {
 
     stage('Verify Tools') {
@@ -17,28 +32,36 @@ stages {
     }
 
     stage('Build Metadata') {
-    steps {
 
-        script {
-            env.GIT_COMMIT_SHORT =
-                bat(
-                    script: 'git rev-parse --short HEAD',
-                    returnStdout: true
-                ).trim()
-
-            env.BUILD_TIMESTAMP =
-                new Date().format(
-                    "yyyy-MM-dd_HH-mm-ss"
-                )
+        when {
+            expression {
+                params.DEPLOY_ACTION == 'DEPLOY'
+            }
         }
 
-        echo "Build Number : ${env.BUILD_NUMBER}"
-        echo "Git Commit   : ${env.GIT_COMMIT_SHORT}"
-        echo "Timestamp    : ${env.BUILD_TIMESTAMP}"
+        steps {
+
+            script {
+                env.GIT_COMMIT_SHORT =
+                    bat(
+                        script: 'git rev-parse --short HEAD',
+                        returnStdout: true
+                    ).trim()
+            }
+
+            echo "Build Number : ${env.BUILD_NUMBER}"
+            echo "Git Commit   : ${env.GIT_COMMIT_SHORT}"
+        }
     }
-}
 
     stage('Build Backend Image') {
+
+        when {
+            expression {
+                params.DEPLOY_ACTION == 'DEPLOY'
+            }
+        }
+
         steps {
             dir('backend') {
                 bat 'docker build -t ammu-backend:latest .'
@@ -47,6 +70,13 @@ stages {
     }
 
     stage('Build Frontend Image') {
+
+        when {
+            expression {
+                params.DEPLOY_ACTION == 'DEPLOY'
+            }
+        }
+
         steps {
             dir('frontend') {
                 bat 'docker build -t ammu-frontend:latest .'
@@ -55,70 +85,88 @@ stages {
     }
 
     stage('Tag Images') {
-    steps {
 
-        bat 'docker tag ammu-backend:latest %BACKEND_IMAGE%:%BUILD_NUMBER%'
-        bat 'docker tag ammu-backend:latest %BACKEND_IMAGE%:latest'
-        bat 'docker tag ammu-backend:latest %BACKEND_IMAGE%:%GIT_COMMIT_SHORT%'
-        bat 'docker tag ammu-frontend:latest %FRONTEND_IMAGE%:%GIT_COMMIT_SHORT%'
-        bat 'docker tag ammu-frontend:latest %FRONTEND_IMAGE%:%BUILD_NUMBER%'
-        bat 'docker tag ammu-frontend:latest %FRONTEND_IMAGE%:latest'
+        when {
+            expression {
+                params.DEPLOY_ACTION == 'DEPLOY'
+            }
+        }
 
-    }
-}
+        steps {
 
-    // new docker login 
-    stage('Docker Hub Login') {
-    steps {
-        withCredentials([
-            usernamePassword(
-                credentialsId: 'dockerhub-creds',
-                usernameVariable: 'DOCKER_USER',
-                passwordVariable: 'DOCKER_PASS'
-            )
-        ]) {
+            bat 'docker tag ammu-backend:latest %BACKEND_IMAGE%:%BUILD_NUMBER%'
+            bat 'docker tag ammu-backend:latest %BACKEND_IMAGE%:%GIT_COMMIT_SHORT%'
+            bat 'docker tag ammu-backend:latest %BACKEND_IMAGE%:latest'
 
-            writeFile file: 'docker_token.txt', text: env.DOCKER_PASS
-
-            bat '''
-                type docker_token.txt | docker login -u %DOCKER_USER% --password-stdin
-            '''
+            bat 'docker tag ammu-frontend:latest %FRONTEND_IMAGE%:%BUILD_NUMBER%'
+            bat 'docker tag ammu-frontend:latest %FRONTEND_IMAGE%:%GIT_COMMIT_SHORT%'
+            bat 'docker tag ammu-frontend:latest %FRONTEND_IMAGE%:latest'
         }
     }
-}
-    // stage('Docker Hub Login') {
-    //     steps {
-    //         withCredentials([
-    //             usernamePassword(
-    //                 credentialsId: 'dockerhub-creds',
-    //                 usernameVariable: 'DOCKER_USER',
-    //                 passwordVariable: 'DOCKER_PASS'
-    //             )
-    //         ]) {
-    //                 bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
-    //         }
-    //     }
-    // }
+
+    stage('Docker Hub Login') {
+
+        when {
+            expression {
+                params.DEPLOY_ACTION == 'DEPLOY'
+            }
+        }
+
+        steps {
+
+            withCredentials([
+                usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )
+            ]) {
+
+                writeFile file: 'docker_token.txt', text: env.DOCKER_PASS
+
+                bat '''
+                    type docker_token.txt | docker login -u %DOCKER_USER% --password-stdin
+                '''
+
+                bat 'del docker_token.txt'
+            }
+        }
+    }
 
     stage('Push Backend Image') {
-    steps {
 
-        bat 'docker push %BACKEND_IMAGE%:%BUILD_NUMBER%'
-        bat 'docker push %BACKEND_IMAGE%:latest'
+        when {
+            expression {
+                params.DEPLOY_ACTION == 'DEPLOY'
+            }
+        }
 
+        steps {
+
+            bat 'docker push %BACKEND_IMAGE%:%BUILD_NUMBER%'
+            bat 'docker push %BACKEND_IMAGE%:%GIT_COMMIT_SHORT%'
+            bat 'docker push %BACKEND_IMAGE%:latest'
+        }
     }
-}
 
-stage('Push Frontend Image') {
-    steps {
+    stage('Push Frontend Image') {
 
-        bat 'docker push %FRONTEND_IMAGE%:%BUILD_NUMBER%'
-        bat 'docker push %FRONTEND_IMAGE%:latest'
+        when {
+            expression {
+                params.DEPLOY_ACTION == 'DEPLOY'
+            }
+        }
 
+        steps {
+
+            bat 'docker push %FRONTEND_IMAGE%:%BUILD_NUMBER%'
+            bat 'docker push %FRONTEND_IMAGE%:%GIT_COMMIT_SHORT%'
+            bat 'docker push %FRONTEND_IMAGE%:latest'
+        }
     }
-}
 
     stage('Create Environment File') {
+
         steps {
 
             withCredentials([
@@ -134,58 +182,92 @@ stage('Push Frontend Image') {
     }
 
     stage('Create Deploy Variables') {
-    steps {
-        writeFile(
-            file: 'deploy.env',
-            text: "IMAGE_TAG=${env.BUILD_NUMBER}"
-        )
-    }
-}
 
-    stage('Deploy Application'){
-        steps{
+        when {
+            expression {
+                params.DEPLOY_ACTION == 'DEPLOY'
+            }
+        }
+
+        steps {
+
+            writeFile(
+                file: 'deploy.env',
+                text: "IMAGE_TAG=${env.BUILD_NUMBER}"
+            )
+        }
+    }
+
+    stage('Deploy Application') {
+
+        when {
+            expression {
+                params.DEPLOY_ACTION == 'DEPLOY'
+            }
+        }
+
+        steps {
 
             bat 'docker compose --env-file deploy.env -f docker-compose.prod.yml down'
-
             bat 'docker compose --env-file deploy.env -f docker-compose.prod.yml pull'
-
             bat 'docker compose --env-file deploy.env -f docker-compose.prod.yml up -d'
+        }
+    }
 
+    stage('Rollback Deployment') {
+
+        when {
+            expression {
+                params.DEPLOY_ACTION == 'ROLLBACK'
+            }
+        }
+
+        steps {
+
+            script {
+                if (!params.ROLLBACK_VERSION?.trim()) {
+                    error("ROLLBACK_VERSION is required")
+                }
+            }
+
+            writeFile(
+                file: 'rollback.env',
+                text: "IMAGE_TAG=${params.ROLLBACK_VERSION}"
+            )
+
+            bat 'docker compose --env-file rollback.env -f docker-compose.prod.yml down'
+            bat 'docker compose --env-file rollback.env -f docker-compose.prod.yml pull'
+            bat 'docker compose --env-file rollback.env -f docker-compose.prod.yml up -d'
         }
     }
 
     stage('Health Check') {
-    steps {
-        powershell '''
-            Start-Sleep -Seconds 15
 
-            $response = Invoke-RestMethod `
-                -Uri "http://localhost:5000/api/health"
-
-            if ($response.status -ne "ok") {
-                throw "Backend Health Check Failed"
+        when {
+            anyOf {
+                expression { params.DEPLOY_ACTION == 'DEPLOY' }
+                expression { params.DEPLOY_ACTION == 'ROLLBACK' }
             }
+        }
 
-            Write-Host "Backend Healthy"
-            Write-Host $response.message
-        '''
+        steps {
+
+            powershell '''
+                Start-Sleep -Seconds 15
+
+                $response = Invoke-RestMethod `
+                    -Uri "http://localhost:5000/api/health"
+
+                if ($response.status -ne "ok") {
+                    throw "Backend Health Check Failed"
+                }
+
+                Write-Host "Backend Healthy"
+                Write-Host $response.message
+            '''
+        }
     }
 }
 
-    // Stage 1 testing of Jenkins Workflow
-    // stage('Verify Git') {
-    //     steps {
-    //         bat 'git --version'
-    //     }
-    // }
-
-    // stage('Verify Docker') {
-    //     steps {
-    //         bat 'docker --version'
-    //     }
-
-    // }
-
-}
 
 }
