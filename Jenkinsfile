@@ -78,32 +78,22 @@ stages {
     // }
 
     stage('Push Backend Image') {
-        steps {
-            withCredentials([
-                usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )
-            ]) {
-                bat 'docker push %DOCKER_USER%/ammufoods-backend:latest'
-            }
-        }
-    }
+    steps {
 
-    stage('Push Frontend Image') {
-        steps {
-            withCredentials([
-                usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )
-            ]) {
-                bat 'docker push %DOCKER_USER%/ammufoods-frontend:latest'
-            }
-        }
+        bat 'docker push %BACKEND_IMAGE%:%BUILD_NUMBER%'
+        bat 'docker push %BACKEND_IMAGE%:latest'
+
     }
+}
+
+stage('Push Frontend Image') {
+    steps {
+
+        bat 'docker push %FRONTEND_IMAGE%:%BUILD_NUMBER%'
+        bat 'docker push %FRONTEND_IMAGE%:latest'
+
+    }
+}
 
     stage('Create Environment File') {
         steps {
