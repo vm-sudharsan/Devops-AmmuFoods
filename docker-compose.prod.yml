@@ -1,7 +1,7 @@
 services:
 
   backend:
-    image: sudharsanprakalathanvm/ammufoods-backend:latest
+    image: sudharsanprakalathanvm/ammufoods-backend:${IMAGE_TAG}
     container_name: ammu-backend
 
     ports:
@@ -13,7 +13,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: sudharsanprakalathanvm/ammufoods-frontend:latest
+    image: sudharsanprakalathanvm/ammufoods-frontend:${IMAGE_TAG}
     container_name: ammu-frontend
 
     ports:
