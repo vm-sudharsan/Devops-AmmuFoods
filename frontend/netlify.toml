@@ -10,6 +10,12 @@
   # Base directory
   base = "frontend"
 
+# Health check endpoint → Netlify function
+[[redirects]]
+  from = "/api/health"
+  to = "/.netlify/functions/health"
+  status = 200
+
 # Redirect all routes to index.html for React Router
 [[redirects]]
   from = "/*"

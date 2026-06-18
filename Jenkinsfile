@@ -116,12 +116,32 @@ stages {
     stage('Deploy Application'){
         steps{
 
+            bat 'docker compose -f docker-compose.prod.yml down'
+
             bat 'docker compose -f docker-compose.prod.yml pull'
 
             bat 'docker compose -f docker-compose.prod.yml up -d'
 
         }
     }
+
+    stage('Health Check') {
+    steps {
+        powershell '
+            Start-Sleep -Seconds 15
+
+            $response = Invoke-RestMethod `
+                -Uri "http://localhost:5000/api/health"
+
+            if ($response.status -ne "ok") {
+                throw "Backend Health Check Failed"
+            }
+
+            Write-Host "Backend Healthy"
+            Write-Host $response.message
+        '
+    }
+}
 
     // Stage 1 testing of Jenkins Workflow
     // stage('Verify Git') {
