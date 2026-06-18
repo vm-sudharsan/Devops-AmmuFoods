@@ -98,6 +98,21 @@ stages {
         }
     }
 
+    stage('Create Environment File') {
+        steps {
+
+            withCredentials([
+                file(
+                    credentialsId: 'ammufoods-env',
+                    variable: 'ENVFILE'
+                )
+            ]) {
+
+                bat 'copy "%ENVFILE%" backend\\.env'
+            }
+        }
+    }
+
     stage('Deploy Application'){
         steps{
 
