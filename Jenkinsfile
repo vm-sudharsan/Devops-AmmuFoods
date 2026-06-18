@@ -1,7 +1,7 @@
 pipeline {
     agent any
 
-    enviroinment{
+    environment{
         DOCKERHUB_USERNAME = "sudharsanprakalathanvm"
     }
 
