@@ -16,6 +16,28 @@ stages {
         }
     }
 
+    stage('Build Metadata') {
+    steps {
+
+        script {
+            env.GIT_COMMIT_SHORT =
+                bat(
+                    script: 'git rev-parse --short HEAD',
+                    returnStdout: true
+                ).trim()
+
+            env.BUILD_TIMESTAMP =
+                new Date().format(
+                    "yyyy-MM-dd_HH-mm-ss"
+                )
+        }
+
+        echo "Build Number : ${env.BUILD_NUMBER}"
+        echo "Git Commit   : ${env.GIT_COMMIT_SHORT}"
+        echo "Timestamp    : ${env.BUILD_TIMESTAMP}"
+    }
+}
+
     stage('Build Backend Image') {
         steps {
             dir('backend') {
@@ -37,7 +59,8 @@ stages {
 
         bat 'docker tag ammu-backend:latest %BACKEND_IMAGE%:%BUILD_NUMBER%'
         bat 'docker tag ammu-backend:latest %BACKEND_IMAGE%:latest'
-
+        bat 'docker tag ammu-backend:latest %BACKEND_IMAGE%:%GIT_COMMIT_SHORT%'
+        bat 'docker tag ammu-frontend:latest %FRONTEND_IMAGE%:%GIT_COMMIT_SHORT%'
         bat 'docker tag ammu-frontend:latest %FRONTEND_IMAGE%:%BUILD_NUMBER%'
         bat 'docker tag ammu-frontend:latest %FRONTEND_IMAGE%:latest'
 
