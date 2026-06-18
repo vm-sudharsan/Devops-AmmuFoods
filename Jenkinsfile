@@ -133,7 +133,7 @@ stage('Push Frontend Image') {
 
     stage('Health Check') {
     steps {
-        powershell '
+        powershell '''
             Start-Sleep -Seconds 15
 
             $response = Invoke-RestMethod `
@@ -145,7 +145,7 @@ stage('Push Frontend Image') {
 
             Write-Host "Backend Healthy"
             Write-Host $response.message
-        '
+        '''
     }
 }
 
