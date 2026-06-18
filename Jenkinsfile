@@ -33,11 +33,16 @@ stages {
     }
 
     stage('Tag Images') {
-        steps {
-            bat 'docker tag ammu-backend:latest %DOCKERHUB_USERNAME%/ammufoods-backend:latest'
-            bat 'docker tag ammu-frontend:latest %DOCKERHUB_USERNAME%/ammufoods-frontend:latest'
-        }
+    steps {
+
+        bat 'docker tag ammu-backend:latest %BACKEND_IMAGE%:%BUILD_NUMBER%'
+        bat 'docker tag ammu-backend:latest %BACKEND_IMAGE%:latest'
+
+        bat 'docker tag ammu-frontend:latest %FRONTEND_IMAGE%:%BUILD_NUMBER%'
+        bat 'docker tag ammu-frontend:latest %FRONTEND_IMAGE%:latest'
+
     }
+}
 
     // new docker login 
     stage('Docker Hub Login') {
