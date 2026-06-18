@@ -198,6 +198,23 @@ stage('Build Metadata') {
         }
     }
 
+stage('Cleanup Existing Containers') {
+
+    when {
+        expression {
+            params.DEPLOY_ACTION == 'DEPLOY'
+        }
+    }
+
+    steps {
+
+        bat '''
+        docker rm -f ammu-backend 2>nul || exit /b 0
+        docker rm -f ammu-frontend 2>nul || exit /b 0
+        '''
+    }
+}
+
     stage('Deploy Application') {
 
         when {
