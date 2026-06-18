@@ -37,19 +37,38 @@ stages {
         }
     }
 
+    // new docker login 
     stage('Docker Hub Login') {
-        steps {
-            withCredentials([
-                usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )
-            ]) {
-                    bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
-            }
+    steps {
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'dockerhub-creds',
+                usernameVariable: 'DOCKER_USER',
+                passwordVariable: 'DOCKER_PASS'
+            )
+        ]) {
+
+            writeFile file: 'docker_token.txt', text: env.DOCKER_PASS
+
+            bat '''
+                type docker_token.txt | docker login -u %DOCKER_USER% --password-stdin
+            '''
         }
     }
+}
+    // stage('Docker Hub Login') {
+    //     steps {
+    //         withCredentials([
+    //             usernamePassword(
+    //                 credentialsId: 'dockerhub-creds',
+    //                 usernameVariable: 'DOCKER_USER',
+    //                 passwordVariable: 'DOCKER_PASS'
+    //             )
+    //         ]) {
+    //                 bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
+    //         }
+    //     }
+    // }
 
     stage('Push Backend Image') {
         steps {
