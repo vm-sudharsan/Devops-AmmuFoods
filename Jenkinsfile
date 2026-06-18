@@ -1,50 +1,43 @@
 pipeline {
-    agent any
+agent any
 
-    environment{
-        DOCKERHUB_USERNAME = "sudharsanprakalathanvm"
+```
+environment {
+    DOCKERHUB_USERNAME = "sudharsanprakalathanvm"
+}
+
+stages {
+
+    stage('Verify Tools') {
+        steps {
+            bat 'git --version'
+            bat 'docker --version'
+        }
     }
 
-    stages {
-        stage('Verify Tools')
-        {
-            steps{
-                bat 'git --version'
-                bat 'docker --version'
+    stage('Build Backend Image') {
+        steps {
+            dir('backend') {
+                bat 'docker build -t ammu-backend:latest .'
             }
         }
+    }
 
-        stage('Build Backend Image')
-        {
-            steps{
-                dir('backend')
-                {
-                    bat 'docker build -t ammu-backend:latest .'
-                }
+    stage('Build Frontend Image') {
+        steps {
+            dir('frontend') {
+                bat 'docker build -t ammu-frontend:latest .'
             }
         }
+    }
 
-        stage('Build Frontend Image')
-        {
-            steps{
-                dir('frontend')
-                {
-                    bat 'docker build -t ammu-frontend:latest .'
-                }
-            }
+    stage('Tag Images') {
+        steps {
+            bat 'docker tag ammu-backend:latest %DOCKERHUB_USERNAME%/ammufoods-backend:latest'
+            bat 'docker tag ammu-frontend:latest %DOCKERHUB_USERNAME%/ammufoods-frontend:latest'
         }
+    }
 
-        stage('Tag Images')
-        {
-            steps{
-                
-
-                bat 'docker tag ammu-backend:latest %DOCKERHUB_USERNAME%/ammufoods-backend:latest'
-
-                bat 'docker tag ammu-frontend:latest %DOCKERHUB_USERNAME%/ammufoods-frontend:latest'
-            }
-        }
-        
     stage('Docker Hub Login') {
         steps {
             withCredentials([
@@ -54,7 +47,6 @@ pipeline {
                     passwordVariable: 'DOCKER_PASS'
                 )
             ]) {
-
                 bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
             }
         }
@@ -69,7 +61,6 @@ pipeline {
                     passwordVariable: 'DOCKER_PASS'
                 )
             ]) {
-
                 bat 'docker push %DOCKER_USER%/ammufoods-backend:latest'
             }
         }
@@ -84,7 +75,6 @@ pipeline {
                     passwordVariable: 'DOCKER_PASS'
                 )
             ]) {
-
                 bat 'docker push %DOCKER_USER%/ammufoods-frontend:latest'
             }
         }
@@ -102,5 +92,8 @@ pipeline {
     //         bat 'docker --version'
     //     }
     // }
+
+}
+```
 
 }
