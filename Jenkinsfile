@@ -3,6 +3,8 @@ agent any
 
 environment {
     DOCKERHUB_USERNAME = "sudharsanprakalathanvm"
+    BACKEND_IMAGE = "sudharsanprakalathanvm/ammufoods-backend"
+    FRONTEND_IMAGE = "sudharsanprakalathanvm/ammufoods-frontend"
 }
 
 stages {
