@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: ammufoods-backend
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: ammufoods-backend
+
+  template:
+    metadata:
+      labels:
+        app: ammufoods-backend
+
+    spec:
+      containers:
+      - name: backend
+
+        image: sudharsanprakalathanvm/ammufoods-backend:latest
+
+        ports:
+        - containerPort: 5000
+
+        envFrom:
+        - secretRef:
+            name: ammufoods-secret
