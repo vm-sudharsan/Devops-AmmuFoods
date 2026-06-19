@@ -20,7 +20,7 @@ spec:
       containers:
       - name: backend
 
-        image: sudharsanprakalathanvm/ammufoods-backend:latest
+        image: sudharsanprakalathanvm/ammufoods-backend:29
 
         ports:
         - containerPort: 5000

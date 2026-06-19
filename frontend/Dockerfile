@@ -9,6 +9,10 @@ RUN npm ci
 
 COPY . .
 
+# Build-time variable
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 # Production Stage
