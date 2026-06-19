@@ -69,21 +69,26 @@ stage('Build Metadata') {
         }
     }
 
-    stage('Build Frontend Image') {
+stage('Build Frontend Image') {
 
-        when {
-            expression {
-                params.DEPLOY_ACTION == 'DEPLOY'
-            }
-        }
-
-        steps {
-            dir('frontend') {
-                bat 'docker build -t ammu-frontend:latest .'
-            }
+    when {
+        expression {
+            params.DEPLOY_ACTION == 'DEPLOY'
         }
     }
 
+    steps {
+
+        dir('frontend') {
+
+            bat '''
+            docker build ^
+            --build-arg VITE_API_URL=http://ammufoods-backend-service:5000/api ^
+            -t ammu-frontend:latest .
+            '''
+        }
+    }
+}
     stage('Tag Images') {
 
         when {
