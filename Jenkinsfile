@@ -94,16 +94,15 @@ pipeline {
                 }
             }
         }
-
-        stage('Trivy Scan') {
+stage('Verify Trivy') {
     steps {
-        bat '''
-        trivy image --severity HIGH,CRITICAL --exit-code 0 ammu-backend:latest
-        '''
-
-        bat '''
-        trivy image --severity HIGH,CRITICAL --exit-code 0 ammu-frontend:latest
-        '''
+        bat 'trivy --version'
+    }
+}
+stage('Trivy Scan') {
+    steps {
+        bat 'trivy image --severity HIGH,CRITICAL --exit-code 0 ammu-backend:latest'
+        bat 'trivy image --severity HIGH,CRITICAL --exit-code 0 ammu-frontend:latest'
     }
 }
 
