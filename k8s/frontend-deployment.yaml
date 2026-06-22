@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: ammufoods-frontend
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: ammufoods-frontend
+
+  template:
+    metadata:
+      labels:
+        app: ammufoods-frontend
+
+    spec:
+      containers:
+      - name: frontend
+        image: sudharsanprakalathanvm/ammufoods-frontend:latest
+
+        ports:
+        - containerPort: 80
