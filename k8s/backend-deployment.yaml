@@ -16,6 +16,11 @@ spec:
       labels:
         app: ammufoods-backend
 
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "5000"
+
     spec:
       containers:
       - name: backend
@@ -48,7 +53,6 @@ spec:
           periodSeconds: 15
 
         resources:
-
           requests:
             cpu: "100m"
             memory: "128Mi"
