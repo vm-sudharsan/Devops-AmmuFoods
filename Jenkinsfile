@@ -95,14 +95,34 @@ pipeline {
             }
         }
 stage('Verify Trivy') {
+
+    when {
+        expression {
+            params.DEPLOY_ACTION == 'DEPLOY'
+        }
+    }
+
     steps {
         bat 'trivy --version'
     }
 }
 stage('Trivy Scan') {
+
+    when {
+        expression {
+            params.DEPLOY_ACTION == 'DEPLOY'
+        }
+    }
+
     steps {
-        bat 'trivy image --severity HIGH,CRITICAL --exit-code 0 ammu-backend:latest'
-        bat 'trivy image --severity HIGH,CRITICAL --exit-code 0 ammu-frontend:latest'
+
+        bat '''
+        trivy image --severity HIGH,CRITICAL --exit-code 0 ammu-backend:latest
+        '''
+
+        bat '''
+        trivy image --severity HIGH,CRITICAL --exit-code 0 ammu-frontend:latest
+        '''
     }
 }
 
@@ -198,9 +218,15 @@ stage('Deploy To Kubernetes') {
     steps {
 
         script {
-            env.PREVIOUS_BUILD =
-                (env.BUILD_NUMBER.toInteger() - 1).toString()
 
+            if (env.BUILD_NUMBER.toInteger() > 1) {
+                env.PREVIOUS_BUILD =
+                    (env.BUILD_NUMBER.toInteger() - 1).toString()
+            } else {
+                env.PREVIOUS_BUILD = ''
+            }
+
+            echo "Current Build : ${env.BUILD_NUMBER}"
             echo "Previous Build: ${env.PREVIOUS_BUILD}"
         }
 
@@ -219,37 +245,47 @@ stage('Deploy To Kubernetes') {
     }
 }
 
-        stage('Rollback Deployment') {
+stage('Rollback Deployment') {
 
-            when {
-                expression {
-                    params.DEPLOY_ACTION == 'ROLLBACK'
-                }
-            }
-
-            steps {
-
-                script {
-
-                    if (!params.ROLLBACK_VERSION?.trim()) {
-                        error("ROLLBACK_VERSION is required")
-                    }
-                }
-
-                bat '''
-                kubectl set image deployment/ammufoods-backend ^
-                backend=sudharsanprakalathanvm/ammufoods-backend:%ROLLBACK_VERSION%
-                '''
-
-                bat '''
-                kubectl set image deployment/ammufoods-frontend ^
-                frontend=sudharsanprakalathanvm/ammufoods-frontend:%ROLLBACK_VERSION%
-                '''
-
-                bat 'kubectl rollout status deployment/ammufoods-backend'
-                bat 'kubectl rollout status deployment/ammufoods-frontend'
-            }
+    when {
+        expression {
+            params.DEPLOY_ACTION == 'ROLLBACK'
         }
+    }
+
+    steps {
+
+        script {
+
+            if (!params.ROLLBACK_VERSION?.trim()) {
+                error("ROLLBACK_VERSION is required")
+            }
+
+            echo "Rolling back to version ${params.ROLLBACK_VERSION}"
+        }
+
+        bat '''
+        docker manifest inspect sudharsanprakalathanvm/ammufoods-backend:%ROLLBACK_VERSION%
+        '''
+
+        bat '''
+        docker manifest inspect sudharsanprakalathanvm/ammufoods-frontend:%ROLLBACK_VERSION%
+        '''
+
+        bat '''
+        kubectl set image deployment/ammufoods-backend ^
+        backend=sudharsanprakalathanvm/ammufoods-backend:%ROLLBACK_VERSION%
+        '''
+
+        bat '''
+        kubectl set image deployment/ammufoods-frontend ^
+        frontend=sudharsanprakalathanvm/ammufoods-frontend:%ROLLBACK_VERSION%
+        '''
+
+        bat 'kubectl rollout status deployment/ammufoods-backend'
+        bat 'kubectl rollout status deployment/ammufoods-frontend'
+    }
+}
 
         stage('Verify Deployment') {
 
@@ -281,27 +317,39 @@ stage('Deploy To Kubernetes') {
       
 
 
-        stage('Health Check') {
+stage('Health Check') {
 
-            when {
-                expression {
-                    params.DEPLOY_ACTION == 'DEPLOY'
-                }
-            }
-
-            steps {
-                bat '''
-                kubectl exec curlpod -- \
-                curl --fail http://ammufoods-backend-service:5000/api/health
-                '''
-            }
+    when {
+        expression {
+            params.DEPLOY_ACTION == 'DEPLOY'
         }
     }
 
-    post {
-        failure {
-            script {
-                echo "Deployment Failed"
+    steps {
+
+        bat '''
+        kubectl exec curlpod -- curl --fail http://ammufoods-backend-service:5000/api/health
+        '''
+
+        echo 'Application Health Check Passed'
+    }
+}
+    }
+
+post {
+
+    failure {
+
+        script {
+
+            echo "Deployment Failed"
+
+            if (!env.PREVIOUS_BUILD?.trim()) {
+
+                echo "No valid rollback version found. Skipping rollback."
+
+            } else {
+
                 echo "Rolling back to build ${env.PREVIOUS_BUILD}"
 
                 bat """
@@ -321,4 +369,5 @@ stage('Deploy To Kubernetes') {
             }
         }
     }
+}
 }

@@ -5,6 +5,7 @@ const cors = require("cors");
 
 const productRoutes = require("./routes/product.routes");
 const eventRoutes = require("./routes/event.routes");
+const metricsRoutes = require("./routes/metrics.routes");
 
 const errorHandler = require("./middlewares/error.middleware");
 const apiLimiter = require("./middlewares/rateLimit.middleware");
@@ -36,6 +37,9 @@ app.use(
     credentials: true,
   })
 );
+
+// ── Prometheus metrics (before rate limiter — internal scraping only) ──
+app.use("/metrics", metricsRoutes);
 
 // ── Rate limiting ──
 app.use(apiLimiter);
