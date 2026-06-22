@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "2"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"name":"ammufoods-frontend","namespace":"default"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"ammufoods-frontend"}},"template":{"metadata":{"labels":{"app":"ammufoods-frontend"}},"spec":{"containers":[{"image":"sudharsanprakalathanvm/ammufoods-frontend:latest","name":"frontend","ports":[{"containerPort":80}]}]}}}}
+  creationTimestamp: "2026-06-19T17:27:23Z"
+  generation: 2
+  name: ammufoods-frontend
+  namespace: default
+  resourceVersion: "33375"
+  uid: b33e0a21-4f17-4a63-ac71-d7bfd8f7580e
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: ammufoods-frontend
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "2026-06-22T09:54:45+05:30"
+      labels:
+        app: ammufoods-frontend
+    spec:
+      containers:
+      - image: sudharsanprakalathanvm/ammufoods-frontend:latest
+        imagePullPolicy: Always
+        name: frontend
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status:
+  availableReplicas: 2
+  conditions:
+  - lastTransitionTime: "2026-06-19T17:27:25Z"
+    lastUpdateTime: "2026-06-19T17:27:25Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2026-06-19T17:27:23Z"
+    lastUpdateTime: "2026-06-22T04:24:48Z"
+    message: ReplicaSet "ammufoods-frontend-7d9c946bd5" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  observedGeneration: 2
+  readyReplicas: 2
+  replicas: 2
+  updatedReplicas: 2
