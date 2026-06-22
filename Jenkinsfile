@@ -23,7 +23,12 @@ parameters {
 }
 
 stages {
-
+    stage('Verify Kubernetes') {
+    steps {
+        bat 'kubectl version --client'
+        bat 'kubectl get nodes'
+    }
+}
     stage('Verify Tools') {
         steps {
             bat 'git --version'
