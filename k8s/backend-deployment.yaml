@@ -20,7 +20,9 @@ spec:
       containers:
       - name: backend
 
-        image: sudharsanprakalathanvm/ammufoods-backend:29
+        image: sudharsanprakalathanvm/ammufoods-backend:latest
+
+        imagePullPolicy: Always
 
         ports:
         - containerPort: 5000
@@ -28,3 +30,29 @@ spec:
         envFrom:
         - secretRef:
             name: ammufoods-secret
+
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 5000
+
+          initialDelaySeconds: 10
+          periodSeconds: 10
+
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 5000
+
+          initialDelaySeconds: 30
+          periodSeconds: 15
+
+        resources:
+
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+
+          limits:
+            cpu: "500m"
+            memory: "512Mi"

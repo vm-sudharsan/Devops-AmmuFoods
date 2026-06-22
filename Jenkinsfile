@@ -259,5 +259,16 @@ pipeline {
                 '''
             }
         }
+
+        stage('Health Check') {
+
+    steps {
+
+        bat '''
+        kubectl exec curlpod -- \
+        curl http://ammufoods-backend-service:5000/api/health
+        '''
+    }
+}
     }
 }
