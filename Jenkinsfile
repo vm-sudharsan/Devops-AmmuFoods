@@ -267,30 +267,25 @@ stage('Deploy To Kubernetes') {
             }
         }
 
+      
+
+
         stage('Health Check') {
-    steps {
-        bat 'exit 1'
+
+            when {
+                expression {
+                    params.DEPLOY_ACTION == 'DEPLOY'
+                }
+            }
+
+            steps {
+                bat '''
+                kubectl exec curlpod -- \
+                curl --fail http://ammufoods-backend-service:5000/api/health
+                '''
+            }
+        }
     }
-}
-    }
-
-
-    //     stage('Health Check') {
-
-    //         when {
-    //             expression {
-    //                 params.DEPLOY_ACTION == 'DEPLOY'
-    //             }
-    //         }
-
-    //         steps {
-    //             bat '''
-    //             kubectl exec curlpod -- \
-    //             curl --fail http://ammufoods-backend-service:5000/api/health
-    //             '''
-    //         }
-    //     }
-    // }
 
     post {
         failure {
