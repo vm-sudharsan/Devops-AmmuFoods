@@ -176,30 +176,37 @@ pipeline {
             }
         }
 
-        stage('Deploy To Kubernetes') {
+stage('Deploy To Kubernetes') {
 
-            when {
-                expression {
-                    params.DEPLOY_ACTION == 'DEPLOY'
-                }
-            }
-
-            steps {
-
-                bat '''
-                kubectl set image deployment/ammufoods-backend ^
-                backend=%BACKEND_IMAGE%:%BUILD_NUMBER%
-                '''
-
-                bat '''
-                kubectl set image deployment/ammufoods-frontend ^
-                frontend=%FRONTEND_IMAGE%:%BUILD_NUMBER%
-                '''
-
-                bat 'kubectl rollout status deployment/ammufoods-backend'
-                bat 'kubectl rollout status deployment/ammufoods-frontend'
-            }
+    when {
+        expression {
+            params.DEPLOY_ACTION == 'DEPLOY'
         }
+    }
+
+    steps {
+
+        script {
+            env.PREVIOUS_BUILD =
+                (env.BUILD_NUMBER.toInteger() - 1).toString()
+
+            echo "Previous Build: ${env.PREVIOUS_BUILD}"
+        }
+
+        bat '''
+        kubectl set image deployment/ammufoods-backend ^
+        backend=%BACKEND_IMAGE%:%BUILD_NUMBER%
+        '''
+
+        bat '''
+        kubectl set image deployment/ammufoods-frontend ^
+        frontend=%FRONTEND_IMAGE%:%BUILD_NUMBER%
+        '''
+
+        bat 'kubectl rollout status deployment/ammufoods-backend'
+        bat 'kubectl rollout status deployment/ammufoods-frontend'
+    }
+}
 
         stage('Rollback Deployment') {
 
@@ -261,14 +268,50 @@ pipeline {
         }
 
         stage('Health Check') {
-
     steps {
-
-        bat '''
-        kubectl exec curlpod -- \
-        curl http://ammufoods-backend-service:5000/api/health
-        '''
+        bat 'exit 1'
     }
 }
+
+
+    //     stage('Health Check') {
+
+    //         when {
+    //             expression {
+    //                 params.DEPLOY_ACTION == 'DEPLOY'
+    //             }
+    //         }
+
+    //         steps {
+    //             bat '''
+    //             kubectl exec curlpod -- \
+    //             curl --fail http://ammufoods-backend-service:5000/api/health
+    //             '''
+    //         }
+    //     }
+    // }
+
+    post {
+        failure {
+            script {
+                echo "Deployment Failed"
+                echo "Rolling back to build ${env.PREVIOUS_BUILD}"
+
+                bat """
+                kubectl set image deployment/ammufoods-backend ^
+                backend=sudharsanprakalathanvm/ammufoods-backend:${env.PREVIOUS_BUILD}
+                """
+
+                bat """
+                kubectl set image deployment/ammufoods-frontend ^
+                frontend=sudharsanprakalathanvm/ammufoods-frontend:${env.PREVIOUS_BUILD}
+                """
+
+                bat 'kubectl rollout status deployment/ammufoods-backend'
+                bat 'kubectl rollout status deployment/ammufoods-frontend'
+
+                echo "Rollback Completed"
+            }
+        }
     }
 }
