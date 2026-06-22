@@ -272,6 +272,7 @@ stage('Deploy To Kubernetes') {
         bat 'exit 1'
     }
 }
+    }
 
 
     //     stage('Health Check') {
@@ -314,5 +315,4 @@ stage('Deploy To Kubernetes') {
             }
         }
     }
-}
 }
