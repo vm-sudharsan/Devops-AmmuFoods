@@ -104,23 +104,38 @@ stages {
         }
     }
 
-    stage('Health Check') {
-        steps {
-            powershell '''
-                Start-Sleep -Seconds 15
+    stage('Deploy To Kubernetes') {
+    steps {
 
-                $response = Invoke-RestMethod `
-                    -Uri "http://localhost:5000/api/health"
+        bat '''
+        kubectl set image deployment/ammufoods-backend ^
+        backend=%BACKEND_IMAGE%:%BUILD_NUMBER%
+        '''
 
-                if ($response.status -ne "ok") {
-                    throw "Backend Health Check Failed"
-                }
+        bat '''
+        kubectl set image deployment/ammufoods-frontend ^
+        frontend=%FRONTEND_IMAGE%:%BUILD_NUMBER%
+        '''
 
-                Write-Host "Backend Healthy"
-                Write-Host $response.message
-            '''
-        }
+        bat 'kubectl rollout status deployment/ammufoods-backend'
+        bat 'kubectl rollout status deployment/ammufoods-frontend'
     }
+}
+
+    stage('Verify Deployment') {
+    steps {
+
+        bat 'kubectl get pods'
+
+        bat '''
+        kubectl rollout status deployment/ammufoods-backend
+        '''
+
+        bat '''
+        kubectl rollout status deployment/ammufoods-frontend
+        '''
+    }
+}
 }
 
 }
