@@ -95,6 +95,18 @@ pipeline {
             }
         }
 
+        stage('Trivy Scan') {
+    steps {
+        bat '''
+        trivy image --severity HIGH,CRITICAL --exit-code 0 ammu-backend:latest
+        '''
+
+        bat '''
+        trivy image --severity HIGH,CRITICAL --exit-code 0 ammu-frontend:latest
+        '''
+    }
+}
+
         stage('Tag Images') {
 
             when {
