@@ -2,6 +2,7 @@
 # Dependencies
 # =========================
 node_modules/
+**/node_modules/
 .pnp
 .pnp.js
 .npm/
@@ -13,6 +14,11 @@ node_modules/
 .env.*
 !.env.example
 
+backend/.env
+frontend/.env
+backend/.env.k8s
+frontend/.env.k8s
+
 # =========================
 # Build Outputs
 # =========================
@@ -21,6 +27,9 @@ dist/
 coverage/
 .cache/
 .turbo/
+
+frontend/dist/
+backend/dist/
 
 # =========================
 # Logs
@@ -89,16 +98,48 @@ Thumbs.db
 *.temp
 
 # =========================
-# Misc
+# Docker Compose Override Only
 # =========================
 docker-compose.override.yml
 
-# Remove project specific docs
+# =========================
+# Vite Cache
+# =========================
+**/.vite/
+**/.vite-temp/
+
+# =========================
+# Backup Files
+# =========================
+*-backup.yaml
+*.backup
+*.bak
+
+# =========================
+# Archive Folder
+# =========================
+_archive/
+LOCAL_ARCHIVE/
+
+# =========================
+# Documentation Cleanup
+# =========================
 FRESH_GIT_PUSH_GUIDE.md
 NETLIFY_DEPLOYMENT_GUIDE.md
 NETLIFY_QUICK_SETUP.md
 
-# Optional docs cleanup
 docs/CLEANUP_SUMMARY.md
 docs/PRODUCTION_DEPLOYMENT_GUIDE.md
 docs/SECURITY_AUDIT_REPORT.md
+
+# =========================
+# Kubernetes Local Files
+# =========================
+*.orig
+*.rej
+
+# =========================
+# Misc
+# =========================
+*.zip
+*.7z
